@@ -21,13 +21,12 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             archive
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/LiftKit.xcarchive \
-            -exportPath build/export \
-            -exportOptionsPlist ExportOptions.plist \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+
+          # Package .app from archive into an unsigned IPA manually
+          # (xcodebuild -exportArchive requires signing; this bypasses it)
+          mkdir -p build/export/Payload
+          cp -r "build/LiftKit.xcarchive/Products/Applications/LiftKit.app" \
+                build/export/Payload/LiftKit.app
+          cd build/export && zip -r LiftKit.ipa Payload && cd ../..
     artifacts:
-      - build/export/*.ipa
+      - build/export/LiftKit.ipa
