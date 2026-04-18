@@ -1,0 +1,54 @@
+name: LiftKit
+options:
+  bundleIdPrefix: com.liftkit
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+
+settings:
+  PRODUCT_BUNDLE_IDENTIFIER: com.liftkit.app
+  SWIFT_VERSION: "5.9"
+  MARKETING_VERSION: "1.1.0"
+  CURRENT_PROJECT_VERSION: "2"
+  DEVELOPMENT_TEAM: ""
+  ENABLE_BITCODE: NO
+
+targets:
+  LiftKit:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    info:
+      path: LiftKit/Info.plist
+    entitlements:
+      path: LiftKit/LiftKit.entitlements
+    sources:
+      - LiftKit
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.liftkit.app
+      INFOPLIST_FILE: LiftKit/Info.plist
+      CODE_SIGN_ENTITLEMENTS: LiftKit/LiftKit.entitlements
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  LiftKitTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - LiftKitTests
+    dependencies:
+      - target: LiftKit
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.liftkit.app.tests
+
+  LiftKitUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - LiftKitUITests
+    dependencies:
+      - target: LiftKit
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.liftkit.app.uitests
+      TEST_TARGET_NAME: LiftKit
