@@ -1,32 +1,55 @@
 import SwiftUI
 
 struct WorkoutTypePickerView: View {
-    @Environment(\.dismiss) private var dismiss
-    let onSelect: (TimerType) -> Void
-
-    let columns = [GridItem(.flexible(), spacing: LKSpacing.sm),
-                   GridItem(.flexible(), spacing: LKSpacing.sm)]
+    @Environment(WorkoutViewModel.self) private var vm
+    @Binding var isPresented: Bool
+    let onStartWorkout: () -> Void
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: LKSpacing.sm) {
+            GeometryReader { geo in
+                let hPad = LKSpacing.md
+                let spacing = LKSpacing.sm
+                let cardW = (geo.size.width - hPad * 2 - spacing) / 2
+                // 3 rows of cards; subtract nav bar (~56pt) + top/bottom padding
+                let availH = geo.size.height - 56 - hPad * 2 - spacing * 2
+                let cardH = max(100, availH / 3)
+
+                LazyVGrid(
+                    columns: [GridItem(.fixed(cardW), spacing: spacing),
+                              GridItem(.fixed(cardW), spacing: spacing)],
+                    spacing: spacing
+                ) {
                     ForEach(TimerType.allCases, id: \.self) { type in
-                        WorkoutTypeCard(type: type) {
-                            HapticManager.shared.buttonTap()
-                            onSelect(type)
+                        NavigationLink(value: type) {
+                            WorkoutTypeCard(type: type)
+                                .frame(height: cardH)
                         }
+                        .buttonStyle(.plain)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            HapticManager.shared.buttonTap()
+                            vm.resetSetup(for: type)
+                        })
                     }
                 }
-                .padding(LKSpacing.md)
+                .padding(.horizontal, hPad)
+                .padding(.top, hPad)
             }
             .background(LKColors.Hex.background)
             .navigationTitle("Choose Workout Type")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { isPresented = false }
                         .foregroundStyle(LKColors.Hex.textSecondary)
+                }
+            }
+            .navigationDestination(for: TimerType.self) { _ in
+                WorkoutSetupView {
+                    isPresented = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        onStartWorkout()
+                    }
                 }
             }
         }
@@ -35,32 +58,29 @@ struct WorkoutTypePickerView: View {
 
 struct WorkoutTypeCard: View {
     let type: TimerType
-    let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: LKSpacing.sm) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(LKColors.Hex.accent)
-                Text(type.rawValue)
-                    .font(LKFont.bodyBold)
-                    .foregroundStyle(LKColors.Hex.textPrimary)
-                    .lineLimit(1)
-                Text(type.subtitle)
-                    .font(LKFont.caption)
-                    .foregroundStyle(LKColors.Hex.textMuted)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(LKSpacing.md)
-            .background(LKColors.Hex.surface)
-            .clipShape(RoundedRectangle(cornerRadius: LKRadius.large))
-            .overlay(
-                RoundedRectangle(cornerRadius: LKRadius.large)
-                    .strokeBorder(LKColors.Hex.surfaceElevated, lineWidth: 1)
-            )
+        VStack(spacing: LKSpacing.sm) {
+            Image(systemName: type.icon)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(LKColors.Hex.accent)
+            Text(type.rawValue)
+                .font(LKFont.bodyBold)
+                .foregroundStyle(LKColors.Hex.textPrimary)
+                .lineLimit(1)
+            Text(type.subtitle)
+                .font(LKFont.caption)
+                .foregroundStyle(LKColors.Hex.textMuted)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(LKSpacing.md)
+        .background(LKColors.Hex.surface)
+        .clipShape(RoundedRectangle(cornerRadius: LKRadius.large))
+        .overlay(
+            RoundedRectangle(cornerRadius: LKRadius.large)
+                .strokeBorder(LKColors.Hex.surfaceElevated, lineWidth: 1)
+        )
     }
 }

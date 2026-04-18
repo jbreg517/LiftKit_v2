@@ -27,6 +27,7 @@ struct LiftKitApp: App {
 
     init() {
         requestNotificationPermission()
+        SoundManager.shared.configure()
     }
 
     private func requestNotificationPermission() {

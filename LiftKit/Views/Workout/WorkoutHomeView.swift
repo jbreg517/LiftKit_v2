@@ -50,12 +50,8 @@ struct WorkoutHomeView: View {
             }
         }
         .sheet(isPresented: $showTypePicker) {
-            WorkoutTypePickerView { type in
-                vm.resetSetup(for: type)
-                showTypePicker = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    showActiveWorkout = true
-                }
+            WorkoutTypePickerView(isPresented: $showTypePicker) {
+                showActiveWorkout = true
             }
         }
         .sheet(isPresented: $showLogin) {

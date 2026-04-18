@@ -302,11 +302,8 @@ struct WorkoutSetupView: View {
     private var startButton: some View {
         Button {
             HapticManager.shared.buttonTap()
-            dismiss()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                vm.startWorkout()
-                onStart()
-            }
+            vm.startWorkout()
+            onStart()
         } label: {
             HStack(spacing: LKSpacing.sm) {
                 Image(systemName: "play.fill")

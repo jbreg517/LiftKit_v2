@@ -86,6 +86,7 @@ final class TimerEngine {
     private var pausedElapsed: TimeInterval?
     private let notificationPrefix: String
     private var screenSleepToken: ScreenSleepManager.Token?
+    private var lastTickSecond: Int = -1
 
     init(notificationPrefix: String = UUID().uuidString) {
         self.notificationPrefix = notificationPrefix
@@ -195,6 +196,7 @@ final class TimerEngine {
         phase = newPhase
         isRunning = true
         timeRemaining = duration
+        lastTickSecond = -1
 
         if case .work = newPhase, let cfg = config,
            (cfg.type == .forTime || cfg.type == .manual) {
@@ -231,6 +233,11 @@ final class TimerEngine {
                 return
             }
             timeRemaining = remaining
+            let secondsLeft = Int(ceil(remaining))
+            if secondsLeft <= 3, secondsLeft > 0, secondsLeft != lastTickSecond {
+                lastTickSecond = secondsLeft
+                SoundManager.shared.playTick()
+            }
         } else if let start = phaseStartDate {
             elapsedTime = now.timeIntervalSince(start)
             timeRemaining = elapsedTime
@@ -317,6 +324,7 @@ final class TimerEngine {
         cancelNotifications()
         screenSleepToken?.release()
         screenSleepToken = nil
+        SoundManager.shared.playComplete()
         onPhaseChange?(.complete)
         onComplete?()
     }

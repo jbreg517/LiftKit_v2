@@ -22,6 +22,8 @@ targets:
       path: LiftKit/Info.plist
     entitlements:
       path: LiftKit/LiftKit.entitlements
+    capabilities:
+      signInWithApple: {}
     sources:
       - LiftKit
     settings:

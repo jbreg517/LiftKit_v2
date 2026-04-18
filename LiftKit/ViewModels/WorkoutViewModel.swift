@@ -405,6 +405,7 @@ final class WorkoutViewModel {
                     sortOrder: i
                 )
                 te.template = template
+                template.exercises.append(te)
                 ctx.insert(te)
             }
         } else {
@@ -419,6 +420,7 @@ final class WorkoutViewModel {
                     sortOrder: i
                 )
                 te.template = template
+                template.exercises.append(te)
                 ctx.insert(te)
             }
         }

@@ -2,6 +2,16 @@ import SwiftUI
 import SwiftData
 import AuthenticationServices
 import CryptoKit
+import UIKit
+
+private final class WebAuthPresenter: NSObject, ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow }) ?? ASPresentationAnchor()
+    }
+}
 
 struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
@@ -143,6 +153,7 @@ struct LoginView: View {
     // No client secret is needed — PKCE handles security for native apps.
 
     private let googleClientId = "YOUR_CLIENT_ID.apps.googleusercontent.com"
+    private let webAuthPresenter = WebAuthPresenter()
 
     private func signInWithGoogle() {
         guard googleClientId != "YOUR_CLIENT_ID.apps.googleusercontent.com" else {
@@ -179,6 +190,7 @@ struct LoginView: View {
                 .queryItems?.first(where: { $0.name == "code" })?.value else { return }
             exchangeGoogleCode(code, verifier: codeVerifier, redirectUri: redirectUri, clientId: googleClientId)
         }
+        session.presentationContextProvider = webAuthPresenter
         session.prefersEphemeralWebBrowserSession = true
         session.start()
     }
